@@ -20,14 +20,23 @@ def predict_savings(income, total_expenses, savings):
     # Predict next month's savings
     next_month_prediction = model.predict([[13]])[0]  # Predicting for month 13
 
-    return f"Predicted savings for next month: ${next_month_prediction:.2f}"
+    explanation = (
+        f"We used a Linear Regression model trained on a simulated savings trend. "
+        f"The model assumes savings increase steadily over time. "
+        f"Based on the last 12 months' simulated savings trend, we predict next month's savings to be: ${next_month_prediction:.2f}."
+    )
+    return next_month_prediction, explanation
 
 def calculate_financial_health_score(income, savings, total_expenses):
     """
     Calculates a financial health score based on savings, expenses, and income.
+    Ensures a score between 0 and 100, preventing division errors.
     """
-    score = (savings / income) * 100 - (total_expenses / income) * 100
-    return max(0, min(100, score))  # Score should be between 0 and 100
+    if income == 0:
+        return 0  # Avoid division by zero
+    
+    score = ((savings - total_expenses) / income) * 100
+    return max(0, min(100, score))  # Ensure score is between 0 and 100
 
 # Streamlit UI
 st.title("💰 Budget & Savings Prediction App")
@@ -52,7 +61,9 @@ if st.button("Analyze Budget & Predict Savings"):
     st.write(f"**Financial Health Score:** {financial_health_score:.2f}/100")
 
     st.subheader("📈 Future Savings Prediction")
-    st.write(predict_savings(income, total_expenses, savings))
+    predicted_savings, explanation = predict_savings(income, total_expenses, savings)
+    st.write(f"Predicted savings for next month: ${predicted_savings:.2f}")
+    st.write(explanation)
 
     # Expense visualization
     labels = ["Rent/Mortgage", "Groceries", "Transportation", "Entertainment", "Debt", "Other Expenses"]
@@ -71,3 +82,4 @@ if st.button("Analyze Budget & Predict Savings"):
         st.info("Your financial health score is decent, but there’s room for improvement. Try saving a higher percentage of your income.")
     else:
         st.success("Great job! Your financial health is strong. Keep maintaining good budgeting habits.")
+
