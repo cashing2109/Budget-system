@@ -66,13 +66,16 @@ def calculate_financial_health_score(income, savings, total_expenses):
     return score, explanation, recommended_budget, user_budget
 
 # Streamlit UI
-st.title("💰 Budget & Financial Goal Recommendation App")
-
-# Add LinkedIn info styled like the first image
-st.markdown("""
-### Made by MD H. Rahman  
-[LinkedIn Profile](https://www.linkedin.com/in/habib-rahmann/)
-""")
+st.markdown(
+    """
+    <div style="text-align: center;">
+        <h1>💰 Budget & Financial Goal Recommendation App</h1>
+        <h3>Made by MD H. Rahman</h3>
+        <p><a href="https://www.linkedin.com/in/habib-rahmann/" target="_blank">LinkedIn Profile</a></p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 income = st.number_input("Enter your monthly income ($)", min_value=0.0, step=100.0)
 rent = st.number_input("Enter your rent or mortgage ($)", min_value=0.0, step=50.0)
