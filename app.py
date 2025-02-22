@@ -115,7 +115,9 @@ if st.button("Analyze Budget & Get Financial Goal"):
         st.info("Your financial health score is decent, but there’s room for improvement. Try saving a higher percentage of your income.")
     else:
         st.success("Great job! Your financial health is strong. Keep maintaining good budgeting habits.")
-
-
-
+    
+    # Footer with LinkedIn profile
+    st.markdown("---")
+    st.markdown("### Made by MD H. Rahman")
+    st.markdown("[LinkedIn Profile](https://www.linkedin.com/in/habib-rahmann/)")
 
