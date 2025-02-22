@@ -50,11 +50,21 @@ def calculate_financial_health_score(income, savings, total_expenses):
         "Other Expenses": 10,
     }
     
+    user_budget = {
+        "Rent/Mortgage": (rent / income) * 100,
+        "Groceries": (groceries / income) * 100,
+        "Transportation": (transportation / income) * 100,
+        "Entertainment": (entertainment / income) * 100,
+        "Savings": (savings / income) * 100,
+        "Debt": (debt / income) * 100,
+        "Other Expenses": (other_expenses / income) * 100,
+    }
+    
     explanation = ""
     if score == 0:
         explanation = "Your financial health score is 0 because your expenses are very high compared to your income and savings. Consider reducing expenses or increasing savings."
     
-    return score, explanation, recommended_budget
+    return score, explanation, recommended_budget, user_budget
 
 # Streamlit UI
 st.title("💰 Budget & Financial Goal Recommendation App")
@@ -71,7 +81,7 @@ other_expenses = st.number_input("Enter any other monthly expenses ($)", min_val
 if st.button("Analyze Budget & Get Financial Goal"):
     total_expenses = rent + groceries + transportation + entertainment + debt + other_expenses
     discretionary_income = income - total_expenses - savings
-    financial_health_score, score_explanation, recommended_budget = calculate_financial_health_score(income, savings, total_expenses)
+    financial_health_score, score_explanation, recommended_budget, user_budget = calculate_financial_health_score(income, savings, total_expenses)
 
     st.subheader("📊 Budget Analysis Summary")
     st.write(f"**Total Expenses:** ${total_expenses:.2f}")
@@ -80,10 +90,11 @@ if st.button("Analyze Budget & Get Financial Goal"):
     if score_explanation:
         st.write(f"ℹ️ {score_explanation}")
     
-    # Display recommended budget allocations
-    st.subheader("🌍 Recommended Budget Allocations (Based on Financial Guidelines)")
+    # Display recommended vs actual budget allocations
+    st.subheader("🌍 Recommended vs Your Budget Allocations")
     for category, percentage in recommended_budget.items():
-        st.write(f"- **{category}**: {percentage}% of income")
+        user_percentage = user_budget.get(category, 0)
+        st.write(f"- **{category}**: Recommended - {percentage}% | Your Spending - {user_percentage:.2f}%")
     
     st.subheader("🎯 Personalized Financial Goal")
     goal_recommendation = financial_goal_recommendation(income, savings, total_expenses)
@@ -106,6 +117,7 @@ if st.button("Analyze Budget & Get Financial Goal"):
         st.info("Your financial health score is decent, but there’s room for improvement. Try saving a higher percentage of your income.")
     else:
         st.success("Great job! Your financial health is strong. Keep maintaining good budgeting habits.")
+
 
 
 
