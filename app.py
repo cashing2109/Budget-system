@@ -29,8 +29,8 @@ def calculate_financial_health_score(income, savings, total_expenses):
     Ensures a score between 0 and 100, preventing division errors.
     Also compares user spending to global recommended budget allocations.
     """
-    if income == 0:
-        return 0, "Income is zero, so a financial score cannot be calculated."
+    if income == 0 or (savings == 0 and total_expenses == 0):
+        return None, "Enter more data to get results.", None, None
     
     savings_ratio = (savings / income) * 100
     expenses_ratio = (total_expenses / income) * 100
@@ -68,6 +68,9 @@ def calculate_financial_health_score(income, savings, total_expenses):
 # Streamlit UI
 st.title("💰 Budget & Financial Goal Recommendation App")
 
+# Add LinkedIn info right below the title
+st.markdown("**Made by [MD H. Rahman](https://www.linkedin.com/in/habib-rahmann/)**")
+
 income = st.number_input("Enter your monthly income ($)", min_value=0.0, step=100.0)
 rent = st.number_input("Enter your rent or mortgage ($)", min_value=0.0, step=50.0)
 groceries = st.number_input("Enter your grocery expenses ($)", min_value=0.0, step=10.0)
@@ -82,42 +85,41 @@ if st.button("Analyze Budget & Get Financial Goal"):
     discretionary_income = income - total_expenses - savings
     financial_health_score, score_explanation, recommended_budget, user_budget = calculate_financial_health_score(income, savings, total_expenses)
 
-    st.subheader("📊 Budget Analysis Summary")
-    st.write(f"**Total Expenses:** ${total_expenses:.2f}")
-    st.write(f"**Discretionary Income:** ${discretionary_income:.2f}")
-    st.write(f"**Financial Health Score:** {financial_health_score:.2f}/100")
-    st.write(f"📌 {score_explanation}")
-    
-    # Display recommended vs actual budget allocations
-    st.subheader("🌍 Recommended vs Your Budget Allocations")
-    for category, percentage in recommended_budget.items():
-        user_percentage = user_budget.get(category, 0)
-        st.write(f"- **{category}**: Recommended - {percentage}% | Your Spending - {user_percentage:.2f}%")
-    
-    st.subheader("🎯 Personalized Financial Goal")
-    goal_recommendation = financial_goal_recommendation(income, savings, total_expenses)
-    st.write(goal_recommendation)
-
-    # Expense visualization
-    labels = ["Rent/Mortgage", "Groceries", "Transportation", "Entertainment", "Debt", "Other Expenses"]
-    values = [rent, groceries, transportation, entertainment, debt, other_expenses]
-
-    fig, ax = plt.subplots()
-    ax.pie(values, labels=labels, autopct="%1.1f%%", startangle=140)
-    ax.set_title("Monthly Expense Breakdown")
-    st.pyplot(fig)
-
-    # Provide recommendations
-    st.subheader("💡 Recommendations")
-    if financial_health_score < 50:
-        st.warning("Your financial health score is below 50. Consider reducing unnecessary expenses and increasing savings.")
-    elif financial_health_score < 80:
-        st.info("Your financial health score is decent, but there’s room for improvement. Try saving a higher percentage of your income.")
+    if financial_health_score is None:
+        st.error(score_explanation)
     else:
-        st.success("Great job! Your financial health is strong. Keep maintaining good budgeting habits.")
-    
-    # Footer with LinkedIn profile
-    st.markdown("---")
-    st.markdown("### Made by MD H. Rahman")
-    st.markdown("[LinkedIn Profile](https://www.linkedin.com/in/habib-rahmann/)")
+        st.subheader("📊 Budget Analysis Summary")
+        st.write(f"**Total Expenses:** ${total_expenses:.2f}")
+        st.write(f"**Discretionary Income:** ${discretionary_income:.2f}")
+        st.write(f"**Financial Health Score:** {financial_health_score:.2f}/100")
+        st.write(f"📌 {score_explanation}")
+        
+        # Display recommended vs actual budget allocations
+        st.subheader("🌍 Recommended vs Your Budget Allocations")
+        for category, percentage in recommended_budget.items():
+            user_percentage = user_budget.get(category, 0)
+            st.write(f"- **{category}**: Recommended - {percentage}% | Your Spending - {user_percentage:.2f}%")
+        
+        st.subheader("🎯 Personalized Financial Goal")
+        goal_recommendation = financial_goal_recommendation(income, savings, total_expenses)
+        st.write(goal_recommendation)
+
+        # Expense visualization
+        labels = ["Rent/Mortgage", "Groceries", "Transportation", "Entertainment", "Debt", "Other Expenses"]
+        values = [rent, groceries, transportation, entertainment, debt, other_expenses]
+
+        fig, ax = plt.subplots()
+        ax.pie(values, labels=labels, autopct="%1.1f%%", startangle=140)
+        ax.set_title("Monthly Expense Breakdown")
+        st.pyplot(fig)
+
+        # Provide recommendations
+        st.subheader("💡 Recommendations")
+        if financial_health_score < 50:
+            st.warning("Your financial health score is below 50. Consider reducing unnecessary expenses and increasing savings.")
+        elif financial_health_score < 80:
+            st.info("Your financial health score is decent, but there’s room for improvement. Try saving a higher percentage of your income.")
+        else:
+            st.success("Great job! Your financial health is strong. Keep maintaining good budgeting habits.")
+
 
