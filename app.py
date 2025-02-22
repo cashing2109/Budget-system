@@ -2,30 +2,26 @@ import numpy as np
 import streamlit as st
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
+import random
 
-def predict_savings(income, total_expenses, savings):
+def financial_goal_recommendation(income, savings, total_expenses):
     """
-    Predicts future savings based on the current budget trends.
-    We used a simple Linear Regression model to estimate the savings for the next month.
-    The model is trained on a simulated savings trend, assuming a steady increase over time.
+    Suggests a personalized financial goal based on income, savings, and spending habits.
     """
-    # Generate a simulated dataset for trend analysis
-    months = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).reshape(-1, 1)  # Last 12 months
-    savings_trend = np.linspace(savings * 0.8, savings * 1.2, 12)  # Simulating a savings trend
-
-    # Train the model on this trend
-    model = LinearRegression()
-    model.fit(months, savings_trend)
-
-    # Predict next month's savings
-    next_month_prediction = model.predict([[13]])[0]  # Predicting for month 13
-
-    explanation = (
-        f"We used a Linear Regression model trained on a simulated savings trend. "
-        f"The model assumes savings increase steadily over time. "
-        f"Based on the last 12 months' simulated savings trend, we predict next month's savings to be: ${next_month_prediction:.2f}."
-    )
-    return next_month_prediction, explanation
+    goals = [
+        "Save an extra $500 this month by reducing discretionary spending!",
+        "Invest 10% of your income into a retirement account for long-term growth.",
+        "Try a no-spend challenge for a week to boost savings!",
+        "Increase your emergency fund to cover at least 6 months of expenses.",
+        "Explore passive income opportunities to boost your financial security!",
+    ]
+    
+    if savings / income < 0.1:
+        return "Your savings rate is low! " + random.choice(goals)
+    elif total_expenses / income > 0.7:
+        return "You're spending a high percentage of your income! " + random.choice(goals)
+    else:
+        return "You're on a great track! Consider this goal: " + random.choice(goals)
 
 def calculate_financial_health_score(income, savings, total_expenses):
     """
@@ -48,7 +44,7 @@ def calculate_financial_health_score(income, savings, total_expenses):
     return score, explanation
 
 # Streamlit UI
-st.title("💰 Budget & Savings Prediction App")
+st.title("💰 Budget & Financial Goal Recommendation App")
 
 income = st.number_input("Enter your monthly income ($)", min_value=0.0, step=100.0)
 rent = st.number_input("Enter your rent or mortgage ($)", min_value=0.0, step=50.0)
@@ -59,7 +55,7 @@ savings = st.number_input("Enter your current monthly savings ($)", min_value=0.
 debt = st.number_input("Enter your monthly debt payments ($)", min_value=0.0, step=10.0)
 other_expenses = st.number_input("Enter any other monthly expenses ($)", min_value=0.0, step=10.0)
 
-if st.button("Analyze Budget & Predict Savings"):
+if st.button("Analyze Budget & Get Financial Goal"):
     total_expenses = rent + groceries + transportation + entertainment + debt + other_expenses
     discretionary_income = income - total_expenses - savings
     financial_health_score, score_explanation = calculate_financial_health_score(income, savings, total_expenses)
@@ -71,10 +67,9 @@ if st.button("Analyze Budget & Predict Savings"):
     if score_explanation:
         st.write(f"ℹ️ {score_explanation}")
 
-    st.subheader("📈 Future Savings Prediction")
-    predicted_savings, explanation = predict_savings(income, total_expenses, savings)
-    st.write(f"Predicted savings for next month: ${predicted_savings:.2f}")
-    st.write(explanation)
+    st.subheader("🎯 Personalized Financial Goal")
+    goal_recommendation = financial_goal_recommendation(income, savings, total_expenses)
+    st.write(goal_recommendation)
 
     # Expense visualization
     labels = ["Rent/Mortgage", "Groceries", "Transportation", "Entertainment", "Debt", "Other Expenses"]
@@ -93,4 +88,5 @@ if st.button("Analyze Budget & Predict Savings"):
         st.info("Your financial health score is decent, but there’s room for improvement. Try saving a higher percentage of your income.")
     else:
         st.success("Great job! Your financial health is strong. Keep maintaining good budgeting habits.")
+
 
