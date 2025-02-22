@@ -35,9 +35,12 @@ def calculate_financial_health_score(income, savings, total_expenses):
     savings_ratio = (savings / income) * 100
     expenses_ratio = (total_expenses / income) * 100
     
-    # Adjusted score calculation to avoid penalizing high-income users unfairly
-    score = ((savings - total_expenses) / income) * 100 + 50
-    score = max(0, min(100, score))  # Ensure score is between 0 and 100
+    # Adjusted score calculation to ensure it is never 0
+    score = (savings_ratio * 0.5) - (expenses_ratio * 0.3) + 50
+    score = max(1, min(100, score))  # Ensure score is between 1 and 100 to avoid 0
+    
+    formula_used = f"Score = (Savings Ratio * 0.5) - (Expenses Ratio * 0.3) + 50"
+    explanation = f"Formula Used: {formula_used}. Calculated as ({savings_ratio:.2f} * 0.5) - ({expenses_ratio:.2f} * 0.3) + 50 = {score:.2f}"
     
     # Global budget recommendations (based on financial guidelines)
     recommended_budget = {
@@ -59,10 +62,6 @@ def calculate_financial_health_score(income, savings, total_expenses):
         "Debt": (debt / income) * 100,
         "Other Expenses": (other_expenses / income) * 100,
     }
-    
-    explanation = ""
-    if score == 0:
-        explanation = "Your financial health score is 0 because your expenses are very high compared to your income and savings. Consider reducing expenses or increasing savings."
     
     return score, explanation, recommended_budget, user_budget
 
@@ -87,8 +86,7 @@ if st.button("Analyze Budget & Get Financial Goal"):
     st.write(f"**Total Expenses:** ${total_expenses:.2f}")
     st.write(f"**Discretionary Income:** ${discretionary_income:.2f}")
     st.write(f"**Financial Health Score:** {financial_health_score:.2f}/100")
-    if score_explanation:
-        st.write(f"ℹ️ {score_explanation}")
+    st.write(f"📌 {score_explanation}")
     
     # Display recommended vs actual budget allocations
     st.subheader("🌍 Recommended vs Your Budget Allocations")
