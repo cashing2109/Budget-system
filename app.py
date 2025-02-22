@@ -33,10 +33,19 @@ def calculate_financial_health_score(income, savings, total_expenses):
     Ensures a score between 0 and 100, preventing division errors.
     """
     if income == 0:
-        return 0  # Avoid division by zero
+        return 0, "Income is zero, so a financial score cannot be calculated."
     
-    score = ((savings - total_expenses) / income) * 100
-    return max(0, min(100, score))  # Ensure score is between 0 and 100
+    savings_ratio = (savings / income) * 100
+    expenses_ratio = (total_expenses / income) * 100
+
+    score = savings_ratio - (expenses_ratio / 2)  # Less penalty for expenses
+    score = max(0, min(100, score))  # Ensure score is between 0 and 100
+
+    explanation = ""
+    if score == 0:
+        explanation = "Your financial health score is 0 because your expenses are very high compared to your income and savings. Consider reducing expenses or increasing savings."
+    
+    return score, explanation
 
 # Streamlit UI
 st.title("💰 Budget & Savings Prediction App")
@@ -53,12 +62,14 @@ other_expenses = st.number_input("Enter any other monthly expenses ($)", min_val
 if st.button("Analyze Budget & Predict Savings"):
     total_expenses = rent + groceries + transportation + entertainment + debt + other_expenses
     discretionary_income = income - total_expenses - savings
-    financial_health_score = calculate_financial_health_score(income, savings, total_expenses)
+    financial_health_score, score_explanation = calculate_financial_health_score(income, savings, total_expenses)
 
     st.subheader("📊 Budget Analysis Summary")
     st.write(f"**Total Expenses:** ${total_expenses:.2f}")
     st.write(f"**Discretionary Income:** ${discretionary_income:.2f}")
     st.write(f"**Financial Health Score:** {financial_health_score:.2f}/100")
+    if score_explanation:
+        st.write(f"ℹ️ {score_explanation}")
 
     st.subheader("📈 Future Savings Prediction")
     predicted_savings, explanation = predict_savings(income, total_expenses, savings)
